@@ -104,3 +104,5 @@ dist/bundle.js
 .tern-port
 
 .DS_Store
+yarn.lock
+package-lock.json
