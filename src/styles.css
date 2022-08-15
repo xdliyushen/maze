@@ -1,0 +1,17 @@
+#app {
+  width: fit-content;
+  height: fit-content;
+  border: 1px solid #000;
+}
+
+.row {
+  display: flex;
+}
+
+.cell {
+  width: 30px;
+  height: 30px;
+  border: 1px solid #000;
+  box-sizing: border-box;
+  margin: -1px 0 0 -1px;
+}
