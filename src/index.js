@@ -141,6 +141,12 @@ const main = () => {
             const isPathComplete = !!(intersection(currCellNeighbors, maze).length);
 
             if (isPathComplete) {
+                const inters = intersection(currCellNeighbors, maze);
+                const neighbor = inters[random(0, inters.length - 1)];
+                const direction = getDirection(currCell, neighbor);
+                currCell.connections[direction] = true;
+                const direction2 = getDirection(neighbor, currCell);
+                neighbor.connections[direction2] = true;
                 // 重新开始寻找新路径
                 break;
             }
