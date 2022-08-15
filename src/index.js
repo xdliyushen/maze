@@ -79,6 +79,26 @@ class Cell {
 const WIDTH = 15;
 const HEIGHT = 15;
 
+// 绘制
+const paint = (grid) => {
+    const app = document.querySelector('#app');
+    app.innerHTML = '';
+
+    for(const row of grid.cells) {
+        const rowEl = document.createElement('div');
+        rowEl.className = 'row';
+
+        for(const cell of row) {
+            const cellEl = document.createElement('div');
+            cellEl.className = 'cell';
+            cellEl.style.borderColor = `${cell.connections.top ? 'transparent' : '#000'} ${cell.connections.right ? 'transparent' : '#000'} ${cell.connections.bottom ? 'transparent' : '#000'} ${cell.connections.left ? 'transparent' : '#000'}`;
+            rowEl.appendChild(cellEl);
+        }
+
+        app.appendChild(rowEl);
+    }
+}
+
 const main = () => {
     const grid = new Grid(WIDTH, HEIGHT);
     const cells = flattenDeep(grid.cells);
@@ -166,27 +186,12 @@ const main = () => {
                     currCell = path[path.length - 1];
                 }
             }
-
         }
 
         maze.push(...path);
     };
 
-    // 绘制
-    const app = document.querySelector('#app');
-    for(const row of grid.cells) {
-        const rowEl = document.createElement('div');
-        rowEl.className = 'row';
-
-        for(const cell of row) {
-            const cellEl = document.createElement('div');
-            cellEl.className = 'cell';
-            cellEl.style.borderColor = `${cell.connections.top ? '#000' : 'transparent'} ${cell.connections.right ? '#000' : 'transparent'} ${cell.connections.bottom ? '#000' : 'transparent'} ${cell.connections.left ? '#000' : 'transparent'}`;
-            rowEl.appendChild(cellEl);
-        }
-
-        app.appendChild(rowEl);
-    }
+    paint(grid);
 };
 
 main();
