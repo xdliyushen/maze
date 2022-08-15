@@ -91,8 +91,7 @@ const paint = (grid) => {
         for(const cell of row) {
             const cellEl = document.createElement('div');
             cellEl.className = 'cell';
-            cellEl.style.borderColor = `${cell.connections.top ? 'transparent' : '#000'} ${cell.connections.right ? 'transparent' : '#000'} ${cell.connections.bottom ? 'transparent' : '#000'} ${cell.connections.left ? 'transparent' : '#000'}`;
-            rowEl.appendChild(cellEl);
+            cellEl.style.borderColor = `${cell.connections.top ? 'transparent' : '#000'} ${cell.connections.right ? 'transparent' : '#000'} ${cell.connections.bottom ? 'transparent' : '#000'} ${cell.connections.left ? 'transparent' : '#000'}`;            rowEl.appendChild(cellEl);
         }
 
         app.appendChild(rowEl);
@@ -158,6 +157,8 @@ const main = () => {
                 } else {
                     const direction = getDirection(currCell, nextCell);
                     currCell.connections[direction] = true;
+                    const direction2 = getDirection(nextCell, currCell);
+                    nextCell.connections[direction2] = true;
 
                     isAllLoop = false;
                     path.push(nextCell);
