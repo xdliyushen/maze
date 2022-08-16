@@ -80,125 +80,130 @@ const WIDTH = 15;
 const HEIGHT = 15;
 
 // 绘制
-const paint = (grid) => {
+const paint = (grid, maze) => {
     const app = document.querySelector('#app');
     app.innerHTML = '';
 
-    for(const row of grid.cells) {
+    for (const row of grid.cells) {
         const rowEl = document.createElement('div');
         rowEl.className = 'row';
 
-        for(const cell of row) {
+        for (const cell of row) {
             const cellEl = document.createElement('div');
             cellEl.className = 'cell';
-            cellEl.style.borderColor = `${cell.connections.top ? 'transparent' : '#000'} ${cell.connections.right ? 'transparent' : '#000'} ${cell.connections.bottom ? 'transparent' : '#000'} ${cell.connections.left ? 'transparent' : '#000'}`;            rowEl.appendChild(cellEl);
+            cellEl.style.borderColor = `${cell.connections.top ? 'transparent' : '#fff'} ${cell.connections.right ? 'transparent' : '#fff'} ${cell.connections.bottom ? 'transparent' : '#fff'} ${cell.connections.left ? 'transparent' : '#fff'}`; 
+
+            if(maze.indexOf(cell) >= 0) {
+                cellEl.style.background = 'transparent';
+                cellEl.style.borderColor = `${cell.connections.top ? 'transparent' : '#000'} ${cell.connections.right ? 'transparent' : '#000'} ${cell.connections.bottom ? 'transparent' : '#000'} ${cell.connections.left ? 'transparent' : '#000'}`; 
+            }
+
+            rowEl.appendChild(cellEl);
         }
 
         app.appendChild(rowEl);
     }
 }
 
-const main = () => {
-    const grid = new Grid(WIDTH, HEIGHT);
-    const cells = flattenDeep(grid.cells);
+const getRandomUnvisitedCell = (cells = [], exceptions = []) => {
+    const unvisitedCells = xor(cells, exceptions);
 
-    const getRandomUnvisitedCell = (exceptions = []) => {
-        const unvisitedCells = xor(cells, exceptions);
-
-        if (!unvisitedCells.length) {
-            return null;
-        }
-
-        const cellIndex = random(0, unvisitedCells.length - 1);
-        const randomCell = unvisitedCells[cellIndex];
-
-        return randomCell;
+    if (!unvisitedCells.length) {
+        return null;
     }
 
-    const getDirection = (cell, neighbor) => {
-        if (cell.position.x === neighbor.position.x) {
-            return cell.position.y > neighbor.position.y ? 'top' : 'bottom';
-        }
+    const cellIndex = random(0, unvisitedCells.length - 1);
+    const randomCell = unvisitedCells[cellIndex];
 
-        return cell.position.x > neighbor.position.x ? 'left' : 'right';
+    return randomCell;
+}
+
+const getDirection = (cell, neighbor) => {
+    if (cell.position.x === neighbor.position.x) {
+        return cell.position.y > neighbor.position.y ? 'top' : 'bottom';
     }
 
-    const maze = [getRandomUnvisitedCell()];
+    return cell.position.x > neighbor.position.x ? 'left' : 'right';
+}
 
-    while (maze.length < cells.length) {
-        const pathStartCell = getRandomUnvisitedCell(maze);
-        let path = [pathStartCell];
-        // 二维数组 存储 path 中已经做出的选择以及不能用的选择
-        let blackList = [];
-        let currCell = pathStartCell;
+const grid = new Grid(WIDTH, HEIGHT);
+const cells = flattenDeep(grid.cells);
 
-        while (1) {
-            const deadEndCells = blackList[blackList.length - 1] || [];
-            const currCellNeighbors = shuffle(currCell.getNeighbors()
-                // 不能往回走
-                .filter(v => path.indexOf(v) === -1 && deadEndCells.indexOf(v) === -1));
-            // 是否与迷宫联通
-            const isPathComplete = !!(intersection(currCellNeighbors, maze).length);
+const maze = [getRandomUnvisitedCell(cells)];
+let path = [getRandomUnvisitedCell(cells, maze)];
+// 二维数组 存储 path 中已经做出的选择以及不能用的选择
+let currCell = path[0];
+let blackList = [];
 
-            if (isPathComplete) {
-                const inters = intersection(currCellNeighbors, maze);
-                const neighbor = inters[random(0, inters.length - 1)];
-                const direction = getDirection(currCell, neighbor);
-                currCell.connections[direction] = true;
-                const direction2 = getDirection(neighbor, currCell);
-                neighbor.connections[direction2] = true;
-                // 重新开始寻找新路径
-                break;
-            }
+const nextStep = () => {
+    const deadEndCells = blackList[blackList.length - 1] || [];
+    const currCellNeighbors = shuffle(currCell.getNeighbors()
+        // 不能往回走
+        .filter(v => path.indexOf(v) === -1 && deadEndCells.indexOf(v) === -1));
+    // 是否与迷宫联通
+    const isPathComplete = !!(intersection(currCellNeighbors, maze).length);
 
-            let isAllLoop = true;
-            for (const nextCell of currCellNeighbors) {
-                const nextCellNeighbors = nextCell.getNeighbors();
+    if (isPathComplete) {
+        const inters = intersection(currCellNeighbors, maze);
+        const neighbor = inters[random(0, inters.length - 1)];
 
-                // 是否在当前路径形成环形
-                const isLoop = !(intersection(nextCellNeighbors, path).length);
-
-                if (isLoop) {
-                    continue;
-                } else {
-                    const direction = getDirection(currCell, nextCell);
-                    currCell.connections[direction] = true;
-                    const direction2 = getDirection(nextCell, currCell);
-                    nextCell.connections[direction2] = true;
-
-                    isAllLoop = false;
-                    path.push(nextCell);
-                    blackList.push([nextCell]);
-                    currCell = nextCell;
-                    break;
-                }
-            }
-
-            if (isAllLoop) {
-                if (path.length === 1) {
-                    const randomCell = getRandomUnvisitedCell(maze);
-                    path = [randomCell];
-                    blackList = [[]];
-                    currCell = randomCell;
-                } else {
-                    const lastPath = path.pop();
-
-                    const direction = getDirection(lastPath, currCell);
-                    lastPath.connections[direction] = false;
-                    const direction2 = getDirection(currCell,lastPath);
-                    currCell.connections[direction2] = false;
-
-                    blackList.pop();
-                    blackList[blackList.length - 1].push(currCell);
-                    currCell = path[path.length - 1];
-                }
-            }
-        }
+        const direction = getDirection(currCell, neighbor);
+        currCell.connections[direction] = true;
+        const direction2 = getDirection(neighbor, currCell);
+        neighbor.connections[direction2] = true;
 
         maze.push(...path);
-    };
+        path = [getRandomUnvisitedCell(cells, maze)];
+        currCell = path[0];
+        blackList = [];
+    } else {
+        let isAllLoop = true;
+        for (const nextCell of currCellNeighbors) {
+            // 是否在当前路径形成环形
+            const isLoop = !(intersection(nextCell, path).length);
 
-    paint(grid);
+            if (isLoop) {
+                continue;
+            } else {
+                const direction = getDirection(currCell, nextCell);
+                currCell.connections[direction] = true;
+                const direction2 = getDirection(nextCell, currCell);
+                nextCell.connections[direction2] = true;
+
+                isAllLoop = false;
+                path.push(nextCell);
+                blackList.push([nextCell]);
+                currCell = nextCell;
+                break;
+            }
+        }
+
+        if (isAllLoop) {
+            if (path.length === 1) {
+                const randomCell = getRandomUnvisitedCell(cells, maze);
+                path = [randomCell];
+                blackList = [[]];
+                currCell = randomCell;
+            } else {
+                // todo bug 重复进入的时候有问题 边界有问题
+                // todo bug 路径重复进入有问题
+                const lastPath = path.pop();
+
+                const direction = getDirection(lastPath, currCell);
+                lastPath.connections[direction] = false;
+                const direction2 = getDirection(currCell, lastPath);
+                currCell.connections[direction2] = false;
+
+                blackList.pop();
+                blackList[blackList.length - 1].push(currCell);
+                currCell = path[path.length - 1];
+            }
+        }
+    }
+
+    paint(grid, maze.concat(path));
 };
 
-main();
+document.querySelector('#next-step-button').addEventListener('click', nextStep)
+
+paint(grid, maze.concat(path));
