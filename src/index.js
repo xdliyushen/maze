@@ -159,8 +159,10 @@ const nextStep = () => {
     } else {
         let isAllLoop = true;
         for (const nextCell of currCellNeighbors) {
+            const nextCellNeighbors = nextCell.getNeighbors();
+
             // 是否在当前路径形成环形
-            const isLoop = !(intersection(nextCell, path).length);
+            const isLoop = !(intersection(nextCellNeighbors, path).length);
 
             if (isLoop) {
                 continue;
