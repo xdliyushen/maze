@@ -6,7 +6,6 @@ import shuffle from 'lodash/shuffle';
 import cloneDeep from 'lodash/cloneDeep';
 import './styles.css';
 // todo 构建表单
-// todo 时间旅行
 // todo 动画速率
 
 const getRandomUnvisitedCell = (cells = [], exceptions = []) => {
@@ -138,6 +137,10 @@ class Grid {
                 }
             }
         }
+
+        this.steps.push(
+            this._snapshot(maze),
+        );
     }
 
     _getDirection(cell, neighbor) {
@@ -148,7 +151,7 @@ class Grid {
         return cell.position.x > neighbor.position.x ? 'left' : 'right';
     }
 
-    _snapshot(maze, currCell) {
+    _snapshot(maze, currCell = null) {
         const cellsClone = cloneDeep(this.cells.map(row => {
             return row.map(v => {
                 return {
@@ -161,11 +164,10 @@ class Grid {
             const { x, y } = cell.position;
             return cellsClone[y][x]
         });
-        const { x: currCellX, y: currCellY, } = currCell.position;
         return {
             gridCells: cellsClone,
             maze: mazeClone,
-            currCell: cellsClone[currCellY][currCellX],
+            currCell: currCell ? cellsClone[currCell.position.y][currCell.position.x] : null,
         }
     }
 
@@ -263,8 +265,6 @@ class Cell {
     }
 }
 
-// const WIDTH = 15;
-// const HEIGHT = 15;
 const WIDTH = 5;
 const HEIGHT = 5;
 
