@@ -76,11 +76,14 @@ class Cell {
     }
 }
 
-const WIDTH = 15;
-const HEIGHT = 15;
+// todo 修改
+// const WIDTH = 15;
+// const HEIGHT = 15;
+const WIDTH = 5;
+const HEIGHT = 5;
 
 // 绘制
-const paint = (grid, maze) => {
+const paint = (grid, maze, currCell) => {
     const app = document.querySelector('#app');
     app.innerHTML = '';
 
@@ -96,6 +99,10 @@ const paint = (grid, maze) => {
             if(maze.indexOf(cell) >= 0) {
                 cellEl.style.background = 'transparent';
                 cellEl.style.borderColor = `${cell.connections.top ? 'transparent' : '#000'} ${cell.connections.right ? 'transparent' : '#000'} ${cell.connections.bottom ? 'transparent' : '#000'} ${cell.connections.left ? 'transparent' : '#000'}`; 
+            }
+
+            if(cell === currCell) {
+                cellEl.style.background = 'red';
             }
 
             rowEl.appendChild(cellEl);
@@ -187,9 +194,8 @@ const nextStep = () => {
                 blackList = [[]];
                 currCell = randomCell;
             } else {
-                // todo bug 重复进入的时候有问题 边界有问题
-                // todo bug 路径重复进入有问题
-                const lastPath = path.pop();
+                path.pop();
+                const lastPath = path[path.length - 1];
 
                 const direction = getDirection(lastPath, currCell);
                 lastPath.connections[direction] = false;
@@ -203,9 +209,14 @@ const nextStep = () => {
         }
     }
 
-    paint(grid, maze.concat(path));
+    paint(grid, maze.concat(path), currCell);
 };
 
+const prevStep = () => {
+    // todo
+};
+
+document.querySelector('#prev-step-button').addEventListener('click', prevStep)
 document.querySelector('#next-step-button').addEventListener('click', nextStep)
 
-paint(grid, maze.concat(path));
+paint(grid, maze.concat(path), currCell);
