@@ -5,9 +5,16 @@
         <meta charset="utf-8">
     </head>
     <body>
-        <div id="app"></div>
+        <div id="maze"></div>
+
+        <div id="current-step">
+            <label for="currentStep">currentStep</label>
+            <input name="currentStep" type="range" max="0" min="0" step="1" />
+        </div>
+
         <button id="prev-step-button" class="button prev-step-button">prev step</button>
         <button id="next-step-button" class="button next-step-button">next step</button>
+
         <script src="bundle.js"></script>
     </body>
 </html>

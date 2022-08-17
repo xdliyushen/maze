@@ -171,16 +171,20 @@ class Grid {
         }
     }
 
-    paintCurrentStep() {
-        const context = this.steps[this.currentStep];
+    setCurrentStep(step) {
+        this.currentStep = step;
+    }
+
+    paintStep(step) {
+        const context = this.steps[step];
 
         if (!context) {
             return;
         }
 
         const { gridCells, maze, currCell } = context;
-        const app = document.querySelector('#app');
-        app.innerHTML = '';
+        const mazeEl = document.querySelector('#maze');
+        mazeEl.innerHTML = '';
 
         for (const row of gridCells) {
             const rowEl = document.createElement('div');
@@ -203,16 +207,8 @@ class Grid {
                 rowEl.appendChild(cellEl);
             }
 
-            app.appendChild(rowEl);
+            mazeEl.appendChild(rowEl);
         }
-    }
-
-    prevStep() {
-        this.currentStep = Math.max(0, this.currentStep - 1);
-    }
-
-    nextStep() {
-        this.currentStep = Math.min(this.steps.length - 1, this.currentStep + 1);
     }
 
     getCell(x, y) {
@@ -270,13 +266,31 @@ const HEIGHT = 5;
 
 const grid = new Grid(WIDTH, HEIGHT);
 
-document.querySelector('#prev-step-button').addEventListener('click', () => {
-    grid.prevStep();
-    grid.paintCurrentStep();
-});
-document.querySelector('#next-step-button').addEventListener('click', () => {
-    grid.nextStep();
-    grid.paintCurrentStep();
+const rangeInputEl = document.querySelector('#current-step input');
+rangeInputEl.setAttribute('max', grid.steps.length - 1);
+rangeInputEl.addEventListener('change', (e) => {
+    const step = parseFloat(e.target.value);
+
+    grid.setCurrentStep(step);
+    grid.paintStep(step);
 });
 
-grid.paintCurrentStep();
+document.querySelector('#prev-step-button').addEventListener('click', () => {
+    const targetStep = Math.max(grid.currentStep - 1, 0);
+
+    grid.setCurrentStep(targetStep);
+    grid.paintStep(targetStep);
+
+    rangeInputEl.value = targetStep;
+});
+
+document.querySelector('#next-step-button').addEventListener('click', () => {
+    const targetStep = Math.min(grid.currentStep + 1, grid.steps.length - 1);
+
+    grid.setCurrentStep(targetStep);
+    grid.paintStep(targetStep);
+
+    rangeInputEl.value = targetStep;
+});
+
+grid.paintStep(0);
