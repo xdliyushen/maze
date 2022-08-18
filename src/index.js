@@ -34,6 +34,8 @@ class Grid {
 
         this._createCells();
         this._generateSteps();
+
+        this.paintStep(0);
     }
 
     _createCells() {
@@ -261,10 +263,10 @@ class Cell {
     }
 }
 
-const WIDTH = 5;
-const HEIGHT = 5;
+let width = 5;
+let height = 5;
 
-const grid = new Grid(WIDTH, HEIGHT);
+let grid = new Grid(width, height);
 
 const rangeInputEl = document.querySelector('#current-step input');
 rangeInputEl.setAttribute('max', grid.steps.length - 1);
@@ -273,6 +275,22 @@ rangeInputEl.addEventListener('change', (e) => {
 
     grid.setCurrentStep(step);
     grid.paintStep(step);
+});
+
+const widthInputEl = document.querySelector('#size input[name="width"]');
+widthInputEl.value = width;
+widthInputEl.addEventListener('change', e => {
+    width = parseFloat(e.target.value);
+    grid = new Grid(width, height);
+    rangeInputEl.setAttribute('max', grid.steps.length - 1);
+});
+
+const heightInputEl = document.querySelector('#size input[name="height"]');
+heightInputEl.value = height;
+heightInputEl.addEventListener('change', e => {
+    height = parseFloat(e.target.value);
+    grid = new Grid(width, height);
+    rangeInputEl.setAttribute('max', grid.steps.length - 1);
 });
 
 document.querySelector('#prev-step-button').addEventListener('click', () => {
@@ -292,5 +310,3 @@ document.querySelector('#next-step-button').addEventListener('click', () => {
 
     rangeInputEl.value = targetStep;
 });
-
-grid.paintStep(0);
